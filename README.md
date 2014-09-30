@@ -19,4 +19,4 @@ $ node server.js
 ```
 
 #####RHC OpenShift Deployment#####
-Fritter is published on RHC OpenShift at .
+Fritter is published on RHC OpenShift at fritter-eflynch.rhcloud.com
