@@ -9,6 +9,10 @@
   "scripts": {
       "build": "browserify client/main.js > static/js/main.js && browserify client/login.js > static/js/login.js"
   },
+  "engines": {
+      "node": ">= 0.6.0",
+      "npm": ">= 1.0.0"
+  },
   "author": "Evan Lynch",
   "dependencies": {
     "backbone": "^1.1.2",
