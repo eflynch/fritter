@@ -1,11 +1,16 @@
+var express = require('express');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 
-var app = require('./app').app;
-
-
-var routeAPI = require('./api').routeAPI;
 var routeViews = require('./views').routeViews
+var routeAPI = require('./api').routeAPI;
+
+var app = express();
+
+app.use('/static', express.static(__dirname + '/static'));
+app.set('views', './templates');
+app.set('view engine', 'jade');
+app.engine('jade', require('jade').__express);
 
 var SECRET = 'asdljk1,4mnsadlfiuy4lkdgyuaper8thlakj.vn12o387ou';
 app.use(cookieParser(SECRET))

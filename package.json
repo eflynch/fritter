@@ -1,10 +1,13 @@
 {
   "name": "eflynch_proj2",
   "version": "1.0.0",
-  "description": "Fritter - a Twitter clone",
+  "description": "Fritter - a potato-based Twitter clone",
   "repository": {
     "type": "git",
     "url": "https://github.com/6170-fa14/eflynch_proj2"
+  },
+  "scripts": {
+      "build": "browserify client/main.js > static/js/main.js && browserify client/login.js > static/js/login.js"
   },
   "author": "Evan Lynch",
   "dependencies": {
