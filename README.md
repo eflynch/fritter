@@ -2,7 +2,7 @@ proj2 - Fritter (a potato-based Twitter clone)
 =====
 
 #####What is Fritter?#####
-Fritter is a potato-based clone of Twitter. Do you have a under-investigated opinion
+Fritter is a potato-based clone of Twitter. Do you have an under-investigated opinion
 about a trending topic that you can't help but broadcast to a general audience? Is it
 about potatoes? If the answer to both of those questions is YES, then Fritter is the
 web service for you! Become a Fryer! Join out (very small) community of committed

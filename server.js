@@ -19,4 +19,5 @@ app.use(session({secret: SECRET, resave: true, saveUninitialized: true}));
 routeAPI(app);
 routeViews(app);
 
-app.listen(8080);
+app.listen(process.env.OPENSHIFT_NODEJS_PORT || 8080, process.env.OPENSHIFT_NODEJS_IP);
+

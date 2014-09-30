@@ -32,5 +32,6 @@
     "gulp-util": "^3.0.1",
     "vinyl-source-stream": "^1.0.0",
     "watchify": "^1.0.6"
-  }
+  },
+  "main": "server.js"
 }
