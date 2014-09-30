@@ -1,7 +1,16 @@
 var mongoose = require('mongoose');
 
 // Database Instance
-var db = mongoose.connect('mongodb://localhost/fritter');
+var connectionString = 'localhost/fritter';
+
+if (process.env.OPENSHIFT_MONOGODB_DB_PASSWORD){
+    connectionString = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ':' +
+        process.env.OPENSHIFT_MONGODB_DB_PASSWORD + '@' +
+        process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
+        process.env.OPENSHIFT_MONGODB_DB_PORT + '/fritter';
+}
+
+var db = mongoose.connect('mongodb://' + connectionString);
 
 
 // Helper Methods
