@@ -7,7 +7,7 @@ var models = require('./models');
 
 var ra = React.DOM;
 
-
+// Send logout POST to API
 var logout = function () {
     return $.ajax('/api/logout',{
         contentType: 'application/json',
@@ -15,6 +15,7 @@ var logout = function () {
     });
 };
 
+// Username and logout command
 var TopBar = React.createClass({
     render: function(){
         return ra.div({className: 'topbar'},
@@ -26,6 +27,7 @@ var TopBar = React.createClass({
     }
 });
 
+// Query input field for $cashtags and @fryers
 var QueryBar = React.createClass({
     handleClearQuery: function(){
         this.props.handleSetQuery('');
@@ -46,6 +48,7 @@ var QueryBar = React.createClass({
     }
 });
 
+// Post input field for POSTing new Frites to API
 var PostBar = React.createClass({
     handlePost: function (e){
         if (e.key == 'Enter'){
@@ -79,6 +82,7 @@ var PostBar = React.createClass({
     }
 });
 
+// Root react component
 var Fritter = React.createClass({
     logoutCallback: function (){
         logout()
@@ -143,7 +147,7 @@ var Fritter = React.createClass({
             fetchData();
         });
     },
-    fetchData: _.debounce(function (){
+    fetchData: _.debounce(function (){ // All fetches should go through here
         var frites = this.state.frites;
         var cashtags = this.state.query.match(/\$\w+/g);
         var usernames = this.state.query.match(/@\w+/g);

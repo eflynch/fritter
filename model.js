@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 
-
 // Database Instance
 var db = mongoose.connect('mongodb://localhost/fritter');
 
@@ -23,6 +22,7 @@ var UserSchema = new mongoose.Schema({
     hash: String,
     apiID: {type: String, default: function () {return makeID('u', 10);}}
 });
+// User.toJSON implemented as whitelist --- do not expose hash!
 UserSchema.set('toJSON', {
     transform: function(doc, ret, options) {
         return {
@@ -44,6 +44,7 @@ var FriteSchema = new mongoose.Schema({
     user: {type: mongoose.Schema.ObjectId, ref: 'users'},
     refry: {type: mongoose.Schema.ObjectId, ref: 'users'}
 });
+// Frite.toJSON implemented as whitelist
 FriteSchema.set('toJSON', {
     transform: function(doc, ret, options) {
         return {

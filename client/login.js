@@ -3,7 +3,7 @@ var $ = require('jquery');
 
 var ra = React.DOM;
 
-
+// POST login to API
 var login = function () {
     var username = $('.username').val();
     var password = $('.password').val();
@@ -17,6 +17,7 @@ var login = function () {
     });
 };
 
+// POST users API
 var createUser = function () {
     var username = $('.username').val();
     var password = $('.password').val();
