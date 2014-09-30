@@ -1,0 +1,311 @@
+body {
+    background-color: #bbbbbb;
+    margin: 0px;
+}
+
+.content {
+    width: 100%;
+    margin: auto;
+}
+
+.top {
+    width: 100%;
+    min-width: 600px;
+    position: fixed;
+    top: 0px;
+    background-color: white;
+    height: 50px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.top img.potato {
+    height: 45px;
+    margin-left: 20px;
+    float:left;
+}
+
+.top h1 {
+    margin: 0;
+    padding-left: 20px;
+    float: left;
+    font-family: Helvetica, sans-serif;
+    font-weight: 100;
+    font-size: 38px;
+    color: #af8800;
+    cursor: default;
+}
+
+.top .topbar {
+    float: right;
+    width: 190px;
+    text-align: right;
+    margin-right: 10px;
+    margin-top: 10px;
+    font-family: Helvetica, sans-serif;
+}
+
+.top .topbar a {
+    padding-left: 5px;
+    color: blue;
+    cursor: pointer;
+    font-size: smaller;
+}
+
+.top .querybar {
+    float: right;
+    width: 300px;
+}
+
+.top .querybar input {
+    width: 300px;
+    height: 40px;
+    border: inset;
+    resize: none;
+    outline: none;
+    border-radius: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    cursor: pointer;
+    overflow: hidden;
+    font-size: 16px;
+    font-family: Helvetica, sans-serif;
+    text-align: center;
+    background-color: white;
+    color: #af8800;
+
+}
+.top .querybar input:focus {
+    background-color: #af8800;
+    color: white;
+}
+
+
+.top .querybar input::-webkit-input-placeholder {
+    color: #af8800;
+}
+
+.top .querybar input:-moz-placeholder { /* Firefox 18- */
+    color: #af8800;
+}
+
+.top .querybar input::-moz-placeholder {  /* Firefox 19+ */
+    color: #af8800;
+}
+
+.top .querybar input:-ms-input-placeholder {
+    color: #af8800;
+}
+
+.top .querybar input::selection {
+    background: #ebe300;
+}
+
+.top .querybar input:-moz-selection {
+    background: #ebe300;
+}
+
+.postbar {
+    margin: auto;
+    margin-top: 70px;
+    width: 700px;
+    margin-bottom: 10px;
+}
+
+.postbar textarea {
+    border: inset;
+    resize: none;
+    outline: none;
+    border-radius: 38px;
+    padding-left: 36px;
+    padding-right: 36px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    width: 700px;
+    height: 76px;
+    cursor: pointer;
+    overflow: hidden;
+    font-size: 16px;
+    font-family: Helvetica, sans-serif;
+    text-align: center;
+    background-color: #af8800;
+    color: white;
+}
+
+.postbar textarea:focus {
+    background-color: white;
+    color: #af8800;
+}
+
+.postbar textarea::-webkit-input-placeholder {
+    color: white;
+    font-size: 25px;
+    padding-top: 10px;
+    font-weight: 100;
+}
+
+.postbar textarea:-moz-placeholder { /* Firefox 18- */
+    color: white;
+    font-size: 25px;
+    padding-top: 10px;
+    font-weight: 100;
+}
+
+.postbar textarea::-moz-placeholder {  /* Firefox 19+ */
+    color: white;
+    font-size: 25px;
+    padding-top: 14px;
+    font-weight: 100;
+}
+
+.postbar textarea:-ms-input-placeholder {
+    color: white;
+    font-size: 25px;
+    padding-top: 10px;
+    font-weight: 100;
+}
+
+.postbar textarea::selection {
+    background: #ebe300;
+}
+
+.postbar textarea:-moz-selection {
+    background: #ebe300;
+}
+
+
+.fritterlist {
+    width: 700px;
+    margin: auto;
+    padding-bottom: 30px;
+    border-radius: 15px;
+    background-color: white;
+    padding-left:0px;
+}
+
+ul.fritterlist {
+    list-style: none;
+    position: relative;
+}
+
+ul.fritterlist div.no-frites {
+    font-family: Helvetica, sans-serif;
+    text-align: center;
+    padding-top: 20px;
+    color: #9f7616;
+    font-size: 20px;
+}
+
+ul.fritterlist div.working {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.90);
+    position: absolute;
+    border-radius: 15px;
+    background-image: url('/static/img/potatospin.gif');
+    background-size: 85px 85px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+ul.fritterlist li {
+    padding: 10px;
+    border-bottom: solid 1px;
+}
+
+ul.fritterlist li.deleted {
+    color: #cccccc;
+}
+
+ul.fritterlist li.deleted:hover {
+    color: #cccccc;
+}
+
+ul.fritterlist li h1 {
+    font-family: sans-serif;
+    margin: 0;
+    font-size: 20px;
+    margin-bottom:2px;
+    cursor: pointer;
+}
+
+ul.fritterlist li.deleted h1 {
+    color: #cccccc;
+}
+
+ul.fritterlist li.deleted h1:hover {
+    color: #cccccc;
+}
+
+ul.fritterlist li h1:hover {
+    color: #9f7616;
+}
+
+ul.fritterlist li p.text {
+    margin:0;
+    font-family: Helvetica, sans-serif;
+    font-size: 16px;
+}
+
+ul.fritterlist li.deleted p.text {
+    color: #cccccc;
+}
+
+ul.fritterlist li p.text span.refry-text {
+    color: #56af7d;
+}
+
+ul.fritterlist li p.text span.cashtag {
+    color: #9f7616;
+    cursor: pointer;
+}
+
+ul.fritterlist li.deleted p.text span.cashtag {
+    color: #cccccc;
+}
+
+ul.fritterlist li p.text span.cashtag:hover {
+    color: #d8c334;
+}
+
+ul.fritterlist li.deleted p.text span.cashtag:hover {
+    color: #cccccc;
+}
+
+ul.fritterlist li textarea.text {
+    margin: 0;
+    font-family: Helvetica, sans-serif;
+    font-size: 14px;
+    resize: none;
+    outline: none;
+    border-style: dotted;
+    width: 680px;
+    height: 60px;
+    cursor: pointer;
+    overflow: hidden;
+    font-size: 16px;
+    font-family: Helvetica, sans-serif;
+}
+
+ul.fritterlist li p.timestamp {
+    margin:0;
+    font-family: Helvetica, sans-serif;
+    color: gray;
+    font-size: 14px;
+}
+
+ul.fritterlist li .frite-button {
+    color: blue;
+    padding-left: 10px;
+    font-size: 14px;
+    font-family: Helvetica, sans-serif;
+    cursor: pointer;
+}

@@ -1,0 +1,98 @@
+body {
+    background-color: black;
+}
+
+.content {
+    width: 400px;
+    margin: auto;
+    margin-top: 150px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.content .create-user {
+    color: #af8800;
+    float: right;
+    font-family: Helvetica, sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    margin-right: 50px;
+}
+
+.content .create-user.success {
+    color: #339f1c;
+    cursor: normal;
+}
+
+.content .create-user.fail {
+    color: red;
+    cursor: normal;
+}
+
+.content input {
+    width: 300px;
+    height: 40px;
+    margin-bottom: 4px;
+    margin-left: 50px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 20px;
+    font-size: 16px;
+    outline: none;
+    background-color: #af8800;
+}
+
+.content .login-error {
+    color: red;
+    padding-left: 50px;
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    float: left;
+}
+
+.content div.working {
+    width: 300px;
+    height: 85px;
+    background-color: rgba(0, 0, 0, 0.84);
+    position: absolute;
+    margin-left: 50px;
+    border-radius: 20;
+    background-image: url('/static/img/potatospin.gif');
+    background-size: 85px 85px;
+    background-repeat: no-repeat;
+    background-position: 100px 0;
+}
+
+.content form {
+    margin-bottom: 0px;
+}
+
+.content input::-webkit-input-placeholder {
+   color: white;
+}
+
+.content input:-moz-placeholder { /* Firefox 18- */
+   color: white;  
+}
+
+.content input::-moz-placeholder {  /* Firefox 19+ */
+   color: white;  
+}
+
+.content input:-ms-input-placeholder {  
+   color: white;  
+}
+
+.content input:focus {
+    background-color: white;
+}
+
+.content img {
+    width: 400px;
+    margin-bottom: 40px;
+
+}
