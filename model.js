@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 // Database Instance
 var connectionString = 'localhost/fritter';
 
-if (process.env.OPENSHIFT_MONOGODB_DB_PASSWORD !== null){
+if (process.env.OPENSHIFT_MONOGODB_DB_PASSWORD !== null && process.env.OPENSHIFT_MONGODB_DB_PASSWORD !== undefined){
     connectionString = process.env.OPENSHIFT_MONGODB_DB_USERNAME + ':' +
         process.env.OPENSHIFT_MONGODB_DB_PASSWORD + '@' +
         process.env.OPENSHIFT_MONGODB_DB_HOST + ':' +
