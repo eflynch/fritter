@@ -14,7 +14,8 @@ var Frite = Backbone.Model.extend({
         'text': 'No tweet for you!',
     },
     parse: function (response, options) {
-        response.user = new User(response.user);
+        response.poster = new User(response.poster);
+        response.author = new User(response.author);
         return response;
     },
 });

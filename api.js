@@ -141,7 +141,7 @@ var routeAPI = function (app) {
             }
             validatefrite(req, res, function(text){
                 var cashtags = text.match(/\$\w+/g);
-                var frite = new models.Frite({text: text, user: user, cashtags: cashtags});
+                var frite = new models.Frite({text: text, author: user, poster: user, cashtags: cashtags});
                 frite.save()
                 res.json(frite.toJSON()).end();
             });
@@ -165,12 +165,12 @@ var routeAPI = function (app) {
         models.User.where('username').in(usernames).exec(function (err, result){
             if (err) throw err;
 
-            var query = models.Frite.find({}).populate('user').populate('refry');
+            var query = models.Frite.find({}).populate('author').populate('poster');
             if (cashtags.length){
                 query.where('cashtags').all(cashtags);
             }
-            if (usernames.length){
-                query.where('user').in(result);
+            if (result.length){
+                query.find({$or: [ {poster: {$in: result}}, {author: {$in: result}}]});
             }
             query.exec(function(err, result){
                 res.json({frites: result}).end();
@@ -200,7 +200,7 @@ var routeAPI = function (app) {
     ******************************/
     app.route('/api/frites/:friteID')
     .get(function (req, res) {
-        models.Frite.findOne({apiID: req.params.friteID}).populate('user').populate('refry').populate('refry').exec(function (err, frite){
+        models.Frite.findOne({apiID: req.params.friteID}).populate('poster').populate('author').exec(function (err, frite){
             if (err) {
                 return res.status(404).json({status: 404, error: 'Frite ' + req.params.friteID + 'not found'}).end();
             }
@@ -209,12 +209,12 @@ var routeAPI = function (app) {
     })
     .delete(requireLoggedIn)
     .delete(function (req, res) {
-        models.Frite.findOne({apiID: req.params.friteID}).populate('user').exec(function (err, frite){
+        models.Frite.findOne({apiID: req.params.friteID}).populate('poster').exec(function (err, frite){
             if (err) throw err;
             if (frite === null){
                 return res.status(404).json({status: 404, error: 'Not found'}).end();
             }
-            if (req.session.username !== frite.user.username){
+            if (req.session.username !== frite.poster.username){
                 return res.status(401).json({status: 401, error: 'Not authorized to delete'}).end();
             }
             models.Frite.remove({ apiID: req.params.friteID}, function (err) {
@@ -229,8 +229,8 @@ var routeAPI = function (app) {
     .patch(requireLoggedIn)
     .patch(function (req, res) {
         validatefrite(req, res, function(text){
-            models.Frite.findOne({apiID: req.params.friteID}).populate('user').exec(function (err, frite){
-                if (req.session.username !== frite.user.username){
+            models.Frite.findOne({apiID: req.params.friteID}).populate('poster').exec(function (err, frite){
+                if (req.session.username !== frite.poster.username){
                     return res.status(401).json({status: 401, error: 'Not authorized to patch'}).end();
                 }
                 var cashtags = text.match(/\$\w+/g);
@@ -238,7 +238,7 @@ var routeAPI = function (app) {
                 {
                     text: text,                 // Sets new text
                     timestamp: Date.now(),      // Reset timestampe
-                    refry: null,                // Clear refry field (maintain invariant)
+                    author: frite.poster,       // Reset author to poster
                     cashtags: cashtags          // Reevaluates cashtags
                 }, function (err, numberAffected, raw){
                     if (err) {
@@ -271,16 +271,10 @@ var routeAPI = function (app) {
                 if (err) {
                     return res.status(404).json({status: 404, error: 'Could not find request frite'}).end();
                 }
-                var newRefry;
-                if (frite.refry === null || frite.refry === undefined){
-                    newRefry = frite.user;
-                } else {
-                    newRefry = frite.refry;
-                }
                 var refry = new models.Frite({
                     text: frite.text,
-                    user: user, refry:
-                    newRefry,
+                    poster: user,
+                    author: frite.author,
                     cashtags: frite.cashtags
                 });
                 refry.save()

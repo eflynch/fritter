@@ -29,6 +29,7 @@ var makeID = function (prefix, length) {
 var UserSchema = new mongoose.Schema({
     username: String,
     hash: String,
+    following: [{type: mongoose.Schema.ObjectId, ref: 'users'}],
     apiID: {type: String, default: function () {return makeID('u', 10);}}
 });
 // User.toJSON implemented as whitelist --- do not expose hash!
@@ -36,7 +37,8 @@ UserSchema.set('toJSON', {
     transform: function(doc, ret, options) {
         return {
             username: ret.username,
-            apiID: ret.apiID
+            apiID: ret.apiID,
+            following: ret.following
         };
     }
 });
@@ -50,8 +52,8 @@ var FriteSchema = new mongoose.Schema({
     timestamp: {type: Date, default: Date.now},
     apiID: {type: String, default: function () {return makeID('fr', 10);}},
     cashtags: [String],
-    user: {type: mongoose.Schema.ObjectId, ref: 'users'},
-    refry: {type: mongoose.Schema.ObjectId, ref: 'users'}
+    poster: {type: mongoose.Schema.ObjectId, ref: 'users'},
+    author: {type: mongoose.Schema.ObjectId, ref: 'users'}
 });
 // Frite.toJSON implemented as whitelist
 FriteSchema.set('toJSON', {
@@ -61,8 +63,8 @@ FriteSchema.set('toJSON', {
             timestamp: ret.timestamp,
             apiID: ret.apiID,
             cashtags: ret.cashtags,
-            user: ret.user,
-            refry: ret.refry
+            poster: ret.poster,
+            author: ret.author
         };
     }
 });

@@ -257,9 +257,9 @@ FriteListView = React.createClass({
             var frite = this.props.frites.models[_i];
             results.push(Frite({
                 key: frite.get('apiID'),
-                user: frite.get('user'),
+                poster: frite.get('poster'),
                 text: frite.get('text'),
-                refry: frite.get('refry'),
+                author: frite.get('author'),
                 timestamp: frite.get('timestamp'),
                 frite: frite,
                 handleDelete: this.props.handleDelete,
@@ -333,14 +333,14 @@ FriteText = React.createClass({
                 maxLength: 140
             });
         } else {
-            var refry = '';
-            if (this.props.refry !== null && this.props.refry !== undefined){
-                refry = this.props.refry.username + ' said: ';
+            var refryCitation = '';
+            if (this.props.author.get('username') !== this.props.poster.get('username')){
+                refryCitation = this.props.author.get('username') + ' said: ';
             }
             return ra.p({
                 className: 'text',
             },
-                ra.span({className: 'refry-text'}, refry),
+                ra.span({className: 'refry-text'}, refryCitation),
                 ra.span(null, this.getTextElements())
             );
         }
@@ -389,7 +389,7 @@ Frite = React.createClass({
         if (this.state.deleted){
             return;
         }
-        this.props.handleSetQuery('@' + this.props.user.get('username'));
+        this.props.handleSetQuery('@' + this.props.poster.get('username'));
     },
     getListProps: function(){
         if (this.state.deleted){
@@ -401,7 +401,7 @@ Frite = React.createClass({
         return ra.li(this.getListProps(),
             ra.h1({
                 onClick: this.handleSetQueryToUser
-            }, this.props.user.get('username')),
+            }, this.props.poster.get('username')),
             FriteText({
                 deleted: this.state.deleted,
                 text: this.state.text,
@@ -409,23 +409,24 @@ Frite = React.createClass({
                 onKeyDown: this.onKeyDownHandler,
                 handleSetQuery: this.props.handleSetQuery,
                 edit: this.state.edit,
-                refry: this.props.refry
+                author: this.props.author,
+                poster: this.props.poster
             }),
             ra.p({className:'timestamp'},
                 this.formatTimeStamp(),
                 FriteButton({
                     className: 'refry',
-                    active: (this.props.user.get('username') !== bootstrap.username),
+                    active: (this.props.poster.get('username') !== bootstrap.username),
                     handler: this.handleRefry
                 }, 'refry'),
                 FriteButton({
                     className: 'delete',
-                    active: (this.props.user.get('username') === bootstrap.username && !this.state.deleted),
+                    active: (this.props.poster.get('username') === bootstrap.username && !this.state.deleted),
                     handler: this.handleDelete
                 }, 'delete'),
                 FriteButton({
                     className: 'edit',
-                    active: (this.props.user.get('username') === bootstrap.username && !this.state.edit && !this.state.deleted),
+                    active: (this.props.poster.get('username') === bootstrap.username && !this.state.edit && !this.state.deleted),
                     handler: this.startEditingHandler
                 }, 'edit')
             )
@@ -455,7 +456,8 @@ var Frite = Backbone.Model.extend({
         'text': 'No tweet for you!',
     },
     parse: function (response, options) {
-        response.user = new User(response.user);
+        response.poster = new User(response.poster);
+        response.author = new User(response.author);
         return response;
     },
 });
