@@ -22,11 +22,18 @@ The potato spinner GIF that shows up when the UI is blocking is the clear winner
 highlight is the simple API. The API is good because it is fully specified in terms of inputs, outputs, and side-effects, and though limited in scope, it is designed without a particular client in mind. This made
 writing the REACT client-side app much easier.
 
+The ``features'' I chose to implement beyond the basic requirements of a Twitter-like app are:
+\begin{enumerate}
+\item Following -- the user may add other users to their following list; then they can see only what their friends are frying in a special aggregated view.
+\item Refrying -- the user may, with a single click, quote and share the frite of another user.
+\item Search - the user may choose to see only frites that include selected \$cashtags or only frites from selected other users denoted in the search bar as @username. Message body search is not implemented.
+\end{enumerate}
+
 \section{Design Challenges}
 \label{sec:another_subtitle}
 The main design decisions to make were the following.
 \begin{enumerate}
-\item What schema to select for the data model
+\item What schema and structure to select for the data model
 \item How much view rendering to do client-side / what view end-points to support
 \item What interface to expose through an API to the client
 \item How to model data on the client side
@@ -35,42 +42,46 @@ The main design decisions to make were the following.
 Now, I will describe the decision I made for each and why.
 
 \subsection{Data Model}
-I chose to use the mongoose wrapper for MongoDB. The data model consists of two schema
-defined in model.js.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{model.png}
+    \caption{Data Model}
+    \label{fig:datamodel}
+\end{figure}
+The data model is presented in Figure~\ref{fig:datamodel}. I chose to use the mongoose wrapper for MongoDB.
+Out of the data model come two obvious structures which have been represented with the following schema
+defined in model.js
 \begin{verbatim}
 User:
     username: String
     hash: String
     apiID: String of the form u_??????????
+    following: Array of (ObjectID referencsing users collection)
 
 Frite:
     text: String
     timestamp: Date (serialized by mongoose)
     apiID: String of the form fr_??????????
     cashtags: Array of Strings
-    user: Number (ObjectID referencing users collection) --- ``poster''
-    refry: Number (ObjectID referencing users collection) --- ``author''
+    poster: Number (ObjectID referencing users collection)
+    author: Number (ObjectID referencing users collection)
 \end{verbatim}
-Much of these schema are obvious; however, two decisions stand out. First, each Frite
-carries a reference to a User document rather than a nested user to allow users to
-change their usernames, passwords, etc. in the future.
+The data model was chosen to facilitate the functions of the application. First, each Frite
+carries a reference to a User document rather than a nested user to avoid excesive repetition
+and to make it easier to make modifications the the user part of the data model.
 
-Second, when a Frite is refried (``retweeted''), a new Frite is created with the
-original Frite's text and the refry field set to the original Frite's user. Another option
-would have been to store a separate kind of object instead of a full Frite which would
-references the original Frite. The choice to save only the original Frite's user
-was made to simplify the data model (no recursive structure) and to avoid confusing
-situatiosn like when the original Frite is edited (should the refrys change to?), etc.
+Second, both an ``author'' and a ``poster'' reference are stored for by the each Frite
+to facilitate the `refry' feature. When a Frite is refried the author of the new Frite
+is set to the original Frite's author. If it is later edited, the new Frite's author is
+changed to the poster.
 
-However, Frites are mutable and we don't want to allow a user to refry a Frite and then
-change the text (essentially attributing their own words to someone else). Therefore,
-we have to maintain the invariant that the
-refry field of a Frite is only set to a user if the text of the Frite corresponds to the text
-of another Frite which that user at one point made. This is a hard invariant to verify, but
-easy to maintain and was kept in mind when implementing the API.
+Third, the User carries an array of references to other users implementing a list to be followed.
+This relation was chosen (rather than the reverse), because the primary function of following
+is to allow the user to quickly see the posts of the users they are following (rather than
+to see who is following them, although this could be desired as well).
 
-Finally, the data model was selected so that only one mongoose.populate call would
-need to be made to get a complete picture of a Frite.
+Finally, the data model was selected so that only one level of mongoose.populate would be required
+for the functionality of the application.
 
 \subsection{Views}
 I opted to do the vast majority of view rendering on the client side. The server only

@@ -9,9 +9,9 @@ var login = function () {
     var password = $('.password').val();
     return $.ajax('/api/login',{
         data: JSON.stringify({
-                username: username,
-                password: password
-            }),
+            username: username,
+            password: password
+        }),
         contentType: 'application/json',
         type: 'POST'
     });

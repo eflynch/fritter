@@ -24,6 +24,9 @@ FriteListView = React.createClass({
         }
     },
     getFrites: function (){
+        if (this.props.showing === 'following' && this.props.currentUser.get('following').length === 0){
+            return ra.div({className: 'no-frites'}, 'it looks like you are not following anyone yet');
+        }
         if (this.props.frites.models.length === 0){
             return ra.div({className:'no-frites'}, 'no frites found :(');
         }
@@ -37,8 +40,11 @@ FriteListView = React.createClass({
                 author: frite.get('author'),
                 timestamp: frite.get('timestamp'),
                 frite: frite,
+                currentUser: this.props.currentUser,
                 handleDelete: this.props.handleDelete,
                 handleRefry: this.props.handleRefry,
+                handleFollow: this.props.handleFollow,
+                handleUnfollow: this.props.handleUnfollow,
                 handlePatch: this.props.handlePatch,
                 handleSetQuery: this.props.handleSetQuery
             }));
@@ -122,6 +128,20 @@ FriteText = React.createClass({
     }
 });
 
+FollowButton = React.createClass({
+    render: function (){
+        if (this.props.isPoster) {
+            return ra.div();
+        }
+
+        if (this.props.isFollowing) {
+            return ra.div({className: 'unfollow follow-button', onClick: this.props.handleUnfollow}, '-');
+        }
+
+        return ra.div({className: 'follow follow-button', onClick: this.props.handleFollow}, '+');
+    }
+});
+
 Frite = React.createClass({
     formatTimeStamp: function (){
         return moment(this.props.timestamp).fromNow();
@@ -160,6 +180,12 @@ Frite = React.createClass({
     handleRefry: function(){
         this.props.handleRefry(this.props.frite);
     },
+    handleFollow: function(){
+        this.props.handleFollow(this.props.poster);
+    },
+    handleUnfollow: function(){
+        this.props.handleUnfollow(this.props.poster);
+    },
     handleSetQueryToUser: function(){
         if (this.state.deleted){
             return;
@@ -167,16 +193,42 @@ Frite = React.createClass({
         this.props.handleSetQuery('@' + this.props.poster.get('username'));
     },
     getListProps: function(){
+        var classes = []
         if (this.state.deleted){
-            return {className: 'deleted'};
+            classes.push('deleted');
         }
-        return {};
+        if (this.isPoster()){
+            classes.push('poster');
+        }
+        if (this.isAuthor()){
+            classes.push('author');
+        }
+        if (this.isFollowing()){
+            classes.push('following');
+        }
+        return {className: classes.join(' ')};
+    },
+    isFollowing: function () {
+        return (this.props.currentUser.get('following').where({username: this.props.poster.get('username')}).length > 0);
+    },
+    isPoster: function () {
+        return this.props.poster.get('username') === this.props.currentUser.get('username');
+    },
+    isAuthor: function () {
+        return this.props.author.get('username') === this.props.currentUser.get('username');
     },
     render: function (){
+
         return ra.li(this.getListProps(),
-            ra.h1({
-                onClick: this.handleSetQueryToUser
-            }, this.props.poster.get('username')),
+            ra.div({className: 'follow-button-wrapper'},
+                ra.span({className: 'title', onClick: this.handleSetQueryToUser}, this.props.poster.get('username')),
+                FollowButton({
+                    isFollowing: this.isFollowing(),
+                    isPoster: this.isPoster(),
+                    handleFollow: this.handleFollow,
+                    handleUnfollow: this.handleUnfollow
+                })
+            ),
             FriteText({
                 deleted: this.state.deleted,
                 text: this.state.text,
@@ -191,17 +243,17 @@ Frite = React.createClass({
                 this.formatTimeStamp(),
                 FriteButton({
                     className: 'refry',
-                    active: (this.props.poster.get('username') !== bootstrap.username),
+                    active: !this.isAuthor() && !this.isPoster(),
                     handler: this.handleRefry
                 }, 'refry'),
                 FriteButton({
                     className: 'delete',
-                    active: (this.props.poster.get('username') === bootstrap.username && !this.state.deleted),
+                    active:  this.isPoster() && !this.state.deleted,
                     handler: this.handleDelete
                 }, 'delete'),
                 FriteButton({
                     className: 'edit',
-                    active: (this.props.poster.get('username') === bootstrap.username && !this.state.edit && !this.state.deleted),
+                    active:  this.isPoster() && !this.state.edit && !this.state.deleted,
                     handler: this.startEditingHandler
                 }, 'edit')
             )

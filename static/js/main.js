@@ -16,11 +16,53 @@ var logout = function () {
     });
 };
 
+var ShowingButton = React.createClass({
+    handleClick: function (){
+        this.props.handleSetShowing(this.props.showing);
+    },
+    render: function () {
+        var className = 'showing-button ' + this.props.showing;
+        if (this.props.active){
+            className += ' active';
+        }
+        return ra.div({className: className, onClick: this.handleClick})
+    }
+});
+
+var ShowingBar = React.createClass({
+    render: function (){
+        return ra.div({className: 'showing-bar'},
+            ShowingButton({
+                showing: 'all',
+                active: this.props.showing === 'all',
+                handleSetShowing: this.props.handleSetShowing
+            }),
+            ShowingButton({
+                showing: 'following',
+                active: this.props.showing === 'following',
+                handleSetShowing: this.props.handleSetShowing
+            }),
+            ShowingButton({
+                showing: 'search',
+                active: this.props.showing === 'search',
+                handleSetShowing: this.props.handleSetShowing
+            })
+        );
+    }
+});
+
 // Username and logout command
 var TopBar = React.createClass({
+    formatUsername: function (){
+        if (this.props.username.length > 14) {
+            return this.props.username.slice(0, 11) + '...';
+        } else {
+            return this.props.username;
+        }
+    },
     render: function(){
         return ra.div({className: 'topbar'},
-            'Hi ' + this.props.username,
+            'Hi ' + this.formatUsername(),
             ra.a({
                 onClick: this.props.logoutCallback
             }, 'logout')
@@ -38,8 +80,13 @@ var QueryBar = React.createClass({
         setTimeout(function(){target.select();},0);
     },
     render: function (){
+        var className = 'queryfield'
+        if (this.props.active){
+            className += ' active';
+        }
         return ra.div({className: 'querybar'}, 
             ra.input({
+                className: className,
                 value: this.props.query,
                 onChange: this.props.handleQueryChange,
                 onFocus: this.handleFocus,
@@ -114,13 +161,14 @@ var Fritter = React.createClass({
         .fail();
     },
     handleSetQuery: function (query){
-        this.setState({query: query, working: true})
+        this.setState({query: query, working: true, showing: 'search'})
         this.fetchData();
     },
     handleQueryChange: function (event) {
         this.setState({
             query: event.target.value,
-            working: true
+            working: true,
+            showing: 'search'
         });
         this.fetchData();
     },
@@ -148,20 +196,59 @@ var Fritter = React.createClass({
             fetchData();
         });
     },
+    handleFollow: function (user){
+        var fetchData = this.fetchData;
+        var followURL = '/api/users/' + this.state.currentUser.get('apiID') + '/following'
+        $.ajax(followURL, {
+            contentType: 'application/json',
+            type: 'PATCH',
+            data: JSON.stringify({
+                apiID: user.get('apiID')
+            })
+        })
+        .done(function(){
+            fetchData();
+        });
+    },
+    handleUnfollow: function (user){
+        var fetchData = this.fetchData;
+        var followURL = '/api/users/' + this.state.currentUser.get('apiID') + '/following/' + user.get('apiID');
+        $.ajax(followURL, {
+            contentType: 'application/json',
+            type: 'DELETE',
+        })
+        .done(function(){
+            fetchData();
+        });
+    },
+    handleSetShowing: function (newShowing){
+        if (this.state.showing !== newShowing){
+            this.setState({showing: newShowing, working: true});
+        }
+        this.fetchData();
+        console.log(this.state.showing);
+    },
     fetchData: _.debounce(function (){ // All fetches should go through here
         var frites = this.state.frites;
+        var currentUser = this.state.currentUser;
         var cashtags = this.state.query.match(/\$\w+/g);
         var usernames = this.state.query.match(/@\w+/g);
         var _this = this;
         var options = {data: {}}
-        if (cashtags !== null){
-            options.data.cashtags = cashtags.join();
+        if (this.state.showing === 'search') {
+            if (cashtags !== null){
+                options.data.cashtags = cashtags.join();
+            }
+            if (usernames !== null){
+                usernames = Array.apply(null, usernames).map(function(username){return username.substring(1)});
+                options.data.usernames = usernames.join();
+            }
         }
-        if (usernames !== null){
-            usernames = Array.apply(null, usernames).map(function(username){return username.substring(1)});
-            options.data.usernames = usernames.join();
+        if (this.state.showing === 'following') {
+            options.data.following = this.state.currentUser.get('username')
         }
-        frites.fetch(options)
+        
+        $.when(frites.fetch(options), currentUser.fetch())
         .done(function(){_this.setState({frites: frites, working: false});});
     }, 300),
     componentDidMount: function (){
@@ -173,9 +260,11 @@ var Fritter = React.createClass({
     },
     getInitialState: function() {
         return {
+            showing: 'all',
             query: '',
             post: '',
             frites: this.props.initialCollection,
+            currentUser: this.props.initialCurrentUser,
             working: false
         }
     },
@@ -188,13 +277,18 @@ var Fritter = React.createClass({
                 }),
                 ra.h1(null, 'Fritter'),
                 TopBar({
-                    username: bootstrap.username,
+                    username: this.state.currentUser.get('username'),
                     logoutCallback: this.logoutCallback
                 }),
                 QueryBar({
+                    active: this.state.showing === 'search',
                     query: this.state.query,
                     handleQueryChange: this.handleQueryChange,
                     handleSetQuery: this.handleSetQuery
+                }),
+                ShowingBar({
+                    showing: this.state.showing,
+                    handleSetShowing: this.handleSetShowing
                 })
             ),
             PostBar({
@@ -203,11 +297,15 @@ var Fritter = React.createClass({
                 handlePost: this.handlePost
             }),
             FriteListView({
+                showing: this.state.showing,
                 working: this.state.working,
                 frites: this.state.frites,
+                currentUser: this.state.currentUser,
                 handleDelete: this.handleDelete,
                 handlePatch: this.handlePatch,
                 handleRefry: this.handleRefry,
+                handleFollow: this.handleFollow,
+                handleUnfollow: this.handleUnfollow,
                 handleSetQuery: this.handleSetQuery
             })
         );
@@ -216,9 +314,13 @@ var Fritter = React.createClass({
 
 $(document).ready(function (){
     var frites = new models.Frites();
+    var currentUser = new models.User(bootstrap.currentUser);
+    window.c = currentUser;
+    currentUser.fetch();
     var $content = $('.content');
     React.renderComponent(Fritter({
         initialCollection: frites,
+        initialCurrentUser: currentUser
     }), $content.get(0));
 });
 
@@ -249,6 +351,9 @@ FriteListView = React.createClass({
         }
     },
     getFrites: function (){
+        if (this.props.showing === 'following' && this.props.currentUser.get('following').length === 0){
+            return ra.div({className: 'no-frites'}, 'it looks like you are not following anyone yet');
+        }
         if (this.props.frites.models.length === 0){
             return ra.div({className:'no-frites'}, 'no frites found :(');
         }
@@ -262,8 +367,11 @@ FriteListView = React.createClass({
                 author: frite.get('author'),
                 timestamp: frite.get('timestamp'),
                 frite: frite,
+                currentUser: this.props.currentUser,
                 handleDelete: this.props.handleDelete,
                 handleRefry: this.props.handleRefry,
+                handleFollow: this.props.handleFollow,
+                handleUnfollow: this.props.handleUnfollow,
                 handlePatch: this.props.handlePatch,
                 handleSetQuery: this.props.handleSetQuery
             }));
@@ -347,6 +455,20 @@ FriteText = React.createClass({
     }
 });
 
+FollowButton = React.createClass({
+    render: function (){
+        if (this.props.isPoster) {
+            return ra.div();
+        }
+
+        if (this.props.isFollowing) {
+            return ra.div({className: 'unfollow follow-button', onClick: this.props.handleUnfollow}, '-');
+        }
+
+        return ra.div({className: 'follow follow-button', onClick: this.props.handleFollow}, '+');
+    }
+});
+
 Frite = React.createClass({
     formatTimeStamp: function (){
         return moment(this.props.timestamp).fromNow();
@@ -385,6 +507,12 @@ Frite = React.createClass({
     handleRefry: function(){
         this.props.handleRefry(this.props.frite);
     },
+    handleFollow: function(){
+        this.props.handleFollow(this.props.poster);
+    },
+    handleUnfollow: function(){
+        this.props.handleUnfollow(this.props.poster);
+    },
     handleSetQueryToUser: function(){
         if (this.state.deleted){
             return;
@@ -392,16 +520,42 @@ Frite = React.createClass({
         this.props.handleSetQuery('@' + this.props.poster.get('username'));
     },
     getListProps: function(){
+        var classes = []
         if (this.state.deleted){
-            return {className: 'deleted'};
+            classes.push('deleted');
         }
-        return {};
+        if (this.isPoster()){
+            classes.push('poster');
+        }
+        if (this.isAuthor()){
+            classes.push('author');
+        }
+        if (this.isFollowing()){
+            classes.push('following');
+        }
+        return {className: classes.join(' ')};
+    },
+    isFollowing: function () {
+        return (this.props.currentUser.get('following').where({username: this.props.poster.get('username')}).length > 0);
+    },
+    isPoster: function () {
+        return this.props.poster.get('username') === this.props.currentUser.get('username');
+    },
+    isAuthor: function () {
+        return this.props.author.get('username') === this.props.currentUser.get('username');
     },
     render: function (){
+
         return ra.li(this.getListProps(),
-            ra.h1({
-                onClick: this.handleSetQueryToUser
-            }, this.props.poster.get('username')),
+            ra.div({className: 'follow-button-wrapper'},
+                ra.span({className: 'title', onClick: this.handleSetQueryToUser}, this.props.poster.get('username')),
+                FollowButton({
+                    isFollowing: this.isFollowing(),
+                    isPoster: this.isPoster(),
+                    handleFollow: this.handleFollow,
+                    handleUnfollow: this.handleUnfollow
+                })
+            ),
             FriteText({
                 deleted: this.state.deleted,
                 text: this.state.text,
@@ -416,17 +570,17 @@ Frite = React.createClass({
                 this.formatTimeStamp(),
                 FriteButton({
                     className: 'refry',
-                    active: (this.props.poster.get('username') !== bootstrap.username),
+                    active: !this.isAuthor() && !this.isPoster(),
                     handler: this.handleRefry
                 }, 'refry'),
                 FriteButton({
                     className: 'delete',
-                    active: (this.props.poster.get('username') === bootstrap.username && !this.state.deleted),
+                    active:  this.isPoster() && !this.state.deleted,
                     handler: this.handleDelete
                 }, 'delete'),
                 FriteButton({
                     className: 'edit',
-                    active: (this.props.poster.get('username') === bootstrap.username && !this.state.edit && !this.state.deleted),
+                    active:  this.isPoster() && !this.state.edit && !this.state.deleted,
                     handler: this.startEditingHandler
                 }, 'edit')
             )
@@ -446,7 +600,13 @@ Backbone.$ = $;
 
 var User = Backbone.Model.extend({
     idAttribute: 'apiID',
-    urlRoot: '/users'
+    urlRoot: '/api/users',
+    parse: function (response, options) {
+        response.following = new Backbone.Collection(
+            Array.apply(null, response.following).map(function(followed) {return new User(followed)})
+        );
+        return response;
+    }
 });
 
 var Frite = Backbone.Model.extend({

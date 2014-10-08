@@ -4,7 +4,13 @@ Backbone.$ = $;
 
 var User = Backbone.Model.extend({
     idAttribute: 'apiID',
-    urlRoot: '/users'
+    urlRoot: '/api/users',
+    parse: function (response, options) {
+        response.following = new Backbone.Collection(
+            Array.apply(null, response.following).map(function(followed) {return new User(followed)})
+        );
+        return response;
+    }
 });
 
 var Frite = Backbone.Model.extend({

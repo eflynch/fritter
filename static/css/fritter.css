@@ -9,8 +9,9 @@ body {
 }
 
 .top {
+    z-index: 100;
     width: 100%;
-    min-width: 600px;
+    min-width: 800px;
     position: fixed;
     top: 0px;
     background-color: white;
@@ -42,9 +43,46 @@ body {
     cursor: default;
 }
 
+.top .showing-bar {
+    float: right;
+    height: 40px;
+    width: 130px;
+    margin-top:0px;
+    margin-right: 5px;
+}
+
+.top .showing-bar div.showing-button {
+    height: 40px;
+    width: 40px;
+    margin-right: 3px;
+    border-radius: 20px;
+    background-color: #eeeeee;
+    float: left;
+    cursor: pointer;
+    background-size: 24px 24px;
+    background-repeat: no-repeat;
+    background-position: 50% 50%;
+}
+
+.top .showing-bar div.showing-button.active {
+    background-color: #9f7616;
+}
+
+.top .showing-bar div.showing-button.all {
+    background-image: url('../img/glyphicons_371_global.png');
+}
+
+.top .showing-bar div.showing-button.following {
+    background-image: url('../img/glyphicons_043_group.png');
+}
+
+.top .showing-bar div.showing-button.search {
+    background-image: url('../img/glyphicons_027_search.png');
+}
+
 .top .topbar {
     float: right;
-    width: 190px;
+    width: 150px;
     text-align: right;
     margin-right: 10px;
     margin-top: 10px;
@@ -79,9 +117,13 @@ body {
     font-size: 16px;
     font-family: Helvetica, sans-serif;
     text-align: center;
-    background-color: white;
-    color: #af8800;
 
+    background-color: #cccccc;
+    color: #af8800;
+}
+
+.top .querybar input.active {
+    background-color: white;
 }
 .top .querybar input:focus {
     background-color: #af8800;
@@ -185,7 +227,8 @@ body {
 .fritterlist {
     width: 700px;
     margin: auto;
-    padding-bottom: 30px;
+    padding-bottom: 15px;
+    padding-top: 15px;
     border-radius: 15px;
     background-color: white;
     padding-left:0px;
@@ -209,6 +252,8 @@ ul.fritterlist div.working {
     height: 100%;
     background-color: rgba(255, 255, 255, 0.90);
     position: absolute;
+    top: 0px;
+    left: 0px;
     border-radius: 15px;
     background-image: url('/static/img/potatospin.gif');
     background-size: 85px 85px;
@@ -225,27 +270,71 @@ ul.fritterlist li.deleted {
     color: #cccccc;
 }
 
+ul.fritterlist li.following {
+    background-color: #ffedd8;
+}
+
+ul.fritterlist li.poster {
+    background-color: #fbe79c;
+}
+
 ul.fritterlist li.deleted:hover {
     color: #cccccc;
 }
 
-ul.fritterlist li h1 {
+ul.fritterlist li div.follow-button-wrapper {
+    width: 100%;
+    height: 24px;
+    margin-bottom: 3px;
+}
+
+ul.fritterlist li span.title {
     font-family: sans-serif;
-    margin: 0;
+    margin: 0px;
+    padding: 0;
     font-size: 20px;
-    margin-bottom:2px;
     cursor: pointer;
+    font-weight: 900;
+    float: left;
 }
 
-ul.fritterlist li.deleted h1 {
+ul.fritterlist li div.follow-button {
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    margin-left: 5px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: center;
+    vertical-align: middle;
+    float: left;
+}
+ul.fritterlist li div.follow-button.follow {
+    color: #f0e8a1;
+}
+
+ul.fritterlist li div.follow-button.unfollow {
+    color: #f0e8a1;
+}
+ul.fritterlist li div.follow-button.follow:hover {
+    background-color: #75b88d;
+    color: white;
+}
+ul.fritterlist li div.follow-button.unfollow:hover {
+    background-color: #e24c2a;
+    color: white;
+}
+
+
+ul.fritterlist li.deleted span.title {
     color: #cccccc;
 }
 
-ul.fritterlist li.deleted h1:hover {
+ul.fritterlist li.deleted span.title:hover {
     color: #cccccc;
 }
 
-ul.fritterlist li h1:hover {
+ul.fritterlist li span.title:hover {
     color: #9f7616;
 }
 

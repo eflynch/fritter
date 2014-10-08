@@ -117,14 +117,117 @@ var routeAPI = function (app) {
         });
     });
 
+    /*****************************
+    * Endpoint: /api/users/u_userID
+    * Methods: GET
+    * Returns: user toJSON
+    ******************************/
+    app.route('/api/users/:userID')
+    .get(function (req, res){
+        models.User.findOne({apiID: req.params.userID})
+        .populate('following')
+        .exec(function (err, user){
+            if (err) throw err;
+            if (user === null){
+                return res.status(404).json({status: 404, error: 'User not found'}).end();
+            }
+            return res.json(user.toJSON()).end();
+        });
+    });
+
+    /*****************************
+    * Endpoint: /api/users/u_userID/following
+    * Methods: PATCH
+    * PATCH:
+    *   Fields: [apiID]
+    *   Required: [apiID]
+    *   Effects: Adds user to list of followers of u_userID
+    *   Conditions: LOGGED_IN, u_userID = session user
+    *   Return: updated user.toJSON
+    ******************************/
+    app.route('/api/users/:userID/following')
+    .patch(requireLoggedIn)
+    .patch(function (req, res) {
+        models.User.findOne({'username': req.session.username, apiID: req.params.userID})
+        .populate('following')
+        .exec(function (err, user){
+            if (err || user === null) {
+                return res.status(404).json({status: 404, error: 'Could not update user'}).end();
+            }
+            if (!req.body.hasOwnProperty('apiID')){
+                return res.status(400).json({status: 400, error: 'User apiID field is required'}).end();
+            }
+            var userToAdd = req.body.apiID
+            models.User.findOne({apiID: req.body.apiID}, function (err, userToAdd){
+                if (err) throw err;
+                if (userToAdd === null){
+                    return res.status(404).json({status: 404, error: 'User to follow does not exist'}).end();
+                }
+
+                var newFollowingList = user.following;
+                newFollowingList.push(userToAdd);
+
+                models.User.update({apiID: req.params.userID},
+                                   {following: newFollowingList}, function (err, numberAffected, raw){
+                    if (err || (numberAffected < 1)) {
+                        return res.status(404).json({status: 404, error: 'User ' + req.params.userID + 'not found'}).end();
+                    }
+                    models.User.findOne({apiID: req.params.userID}).populate('following').exec(function (err, user){
+                        res.json(user.toJSON()).end();
+                    });
+                });
+            });
+        });
+    });
+
+    /*****************************
+    * Endpoint: /api/users/u_userID1/following/u_userID2
+    * Methods: DELETE
+    * DELETE:
+    *   Effects: Deletes u_userID2 from following list of u_userID1
+    *   Return: updated u_userID1.toJSON
+    ******************************/
+    app.route('/api/users/:userID/following/:userID2')
+    .delete(requireLoggedIn)
+    .delete(function (req, res){
+        models.User.findOne({'username': req.session.username, apiID: req.params.userID})
+        .populate('following')
+        .exec(function (err, user){
+            if (err || user === null) {
+                return res.status(404).json({status: 404, error: 'Could not update user'}).end();
+            }
+            models.User.findOne({apiID: req.params.userID2}, function (err, userToDelete){
+                if (err) throw err;
+                if (userToDelete === null){
+                    return res.status(404).json({status: 404, error: 'User to unfollow does not exist'}).end();
+                }
+
+                var newFollowingList = user.following;
+                newFollowingList.splice(newFollowingList.indexOf(userToDelete), 1);
+                models.User.update({apiID: req.params.userID},
+                                   {following: newFollowingList}, function (err, numberAffected, raw){
+                    if (err || (numberAffected < 1)) {
+                        return res.status(404).json({status: 404, error: 'User ' + req.params.userID + 'not found'}).end();
+                    }
+                    models.User.findOne({apiID: req.params.userID}, function (err, user){
+                        res.json(user.toJSON()).end();
+                    });
+                });
+            });
+        });
+    });
+
 
     /*****************************
     * Endpoint: /api/frites
     * Methods: POST, GET
     * GET:
-    *   Query: [usernames, cashtags]
+    *   Query: [usernames, cashtags, followers]
     *   Return: Array of Frites toJSON
-    *       Filtered to match any of query.usernames and all of query.cashtags (if present)
+    *       Filtered to match union of
+    *           any of query.usernames 
+    *           all of query.cashtags
+    *           any of each user in query.following
     *
     * POST:
     *   Fields: [text]
@@ -162,20 +265,32 @@ var routeAPI = function (app) {
         if (req.query.usernames !== undefined && req.query.usernames !== null){
             usernames = req.query.usernames.split(',');
         }
-        models.User.where('username').in(usernames).exec(function (err, result){
-            if (err) throw err;
 
-            var query = models.Frite.find({}).populate('author').populate('poster');
-            if (cashtags.length){
-                query.where('cashtags').all(cashtags);
+        models.User.findOne({username: req.query.following}).populate('following').exec(function (err, followedUser){
+            if (err) throw err;
+            if (followedUser !== null){
+                if (followedUser.following.length === 0){
+                    return res.json({frites:[]}).end();
+                }
+                usernames = usernames.concat(Array.apply(null, followedUser.following).map(function (user) {return user.username;}));
             }
-            if (result.length){
-                query.find({$or: [ {poster: {$in: result}}, {author: {$in: result}}]});
-            }
-            query.exec(function(err, result){
-                res.json({frites: result}).end();
+            models.User.where('username').in(usernames).exec(function (err, result){
+                if (err) throw err;
+
+                var query = models.Frite.find({}).populate('author').populate('poster');
+                if (cashtags.length){
+                    query.where('cashtags').all(cashtags);
+                }
+                if (result.length){
+                    query.find({$or: [ {poster: {$in: result}}, {author: {$in: result}}]});
+                }
+                query.sort({timestamp: -1}).limit(20).exec(function(err, result){
+                    res.json({frites: result}).end();
+                });
             });
+
         });
+        
     });
 
 
