@@ -46,7 +46,7 @@ var routeAPI = function (app) {
     .patch(bodyParser.json())
 
 
-    /*****************************
+    /***************************** 
     * Endpoint: /api/login
     * Methods: POST
     * Fields: [username, password]
